@@ -1,9 +1,8 @@
 import { Button, Grid, IconButton, TextField, styled } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 } from "uuid";
-import { log } from "console";
 
 interface ITodo {
     id: string,
@@ -31,7 +30,10 @@ const Div = styled('div')(() => ({
 }));
 
 export const BoxContainer = () => {
-    const [todos, setTodos] = useState<ITodo[]>([]);
+    const storedItems = localStorage.getItem('items');
+    const [todos, setTodos] = useState<ITodo[]>(() =>
+        storedItems !== null ? JSON.parse(storedItems) : []
+    );
     const [editTodoIndex, setEditTodoIndex] = useState<number>();
     const [newTodo, setNewTodo] = useState("");
     const isEdit = editTodoIndex !== undefined;
@@ -66,6 +68,10 @@ export const BoxContainer = () => {
         setNewTodo(todo.title);
     }
 
+    useEffect(() => {
+        localStorage.setItem('items', JSON.stringify(todos));
+    }, [todos]);
+
     return (
         <Grid container spacing={2}>
             <Grid xs={10}>
@@ -75,7 +81,7 @@ export const BoxContainer = () => {
             </Grid>
             <Grid xs={2}>
                 <Item>
-                    <Button variant="contained" color="success" onClick={isEdit ? editHandler : addHandler}>
+                    <Button value="Submit" variant="contained" color="success" onClick={isEdit ? editHandler : addHandler}>
                         {isEdit ? "edit" : "add"}
                     </Button>
                 </Item>
