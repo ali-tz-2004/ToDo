@@ -1,12 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin();
+                          policy.AllowAnyHeader();
+                          policy.AllowAnyMethod();
+                          policy.WithOrigins("http://localhost:3000");
+                      });
+});
+
 builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
+
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+app.UseCors(MyAllowSpecificOrigins);
+
 app.MapGet("/todoItems", async (TodoDb db) =>
-    await db.Todos.ToListAsync());
+    await db.Todos.OrderByDescending(x => x.CreatedAt).ToListAsync());
+
+app.MapGet("/todoItems/complete", async (TodoDb db) =>
+    await db.Todos.Where(t => t.IsComplete).ToListAsync());
 
 app.MapGet("/todoItems/{id}", async (string id, TodoDb db) =>
     await db.Todos.FindAsync(Guid.Parse(id))
@@ -45,6 +65,19 @@ app.MapDelete("/todoItems/{id}", async (string id, TodoDb db) =>
     }
 
     return Results.NotFound();
+});
+
+app.MapPut("/todoItems/{id}/complete", async (string id, TodoDb db) =>
+{
+    var todo = await db.Todos.FindAsync(Guid.Parse(id));
+
+    if (todo is null) return Results.NotFound();
+
+    todo.IsComplete = !todo.IsComplete;
+
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
 });
 
 
