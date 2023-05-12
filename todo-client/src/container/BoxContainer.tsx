@@ -1,4 +1,4 @@
-import { Button, Checkbox, Grid, IconButton, TextField, styled } from "@mui/material";
+import { Accordion, Button, Checkbox, Grid, IconButton, TextField, styled } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormEvent, useEffect, useState } from "react";
@@ -6,6 +6,7 @@ import { v4 } from "uuid";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Popup from "../components/Popup";
+import { CustomizedAccordions } from "../components/CustomizedAccordions";
 
 interface ITodo {
     id: string,
@@ -42,79 +43,87 @@ const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export const BoxContainer = () => {
     const [todos, setTodos] = useState<ITodo[]>([]);
-    const [editTodoIndex, setEditTodoIndex] = useState<number>();
-    const [newTodo, setNewTodo] = useState("");
     const [selectedTodo, setSelectedTodo] = useState<ITodo>();
-    const showDeletePopup = selectedTodo !== undefined;
-    const isEdit = editTodoIndex !== undefined;
+    const [isCompleteTodos, setIsCompleteTodos] = useState<ITodo[]>([]);
+    const [inputValue, setInputValue] = useState("");
+    const [deleteId, setDeleteId] = useState<string>();
 
+    const showDeletePopup = deleteId !== undefined;
+    const isEdit = selectedTodo !== undefined;
     const API_URL = 'http://localhost:5147/todoItems';
 
-    const getTodoList = async (): Promise<ITodo[]> => {
+    const getTodoList = async (): Promise<[ITodo[], ITodo[]]> => {
         reset();
+
         const response = await axios.get(API_URL);
+        const responseComplete = await axios.get(`${API_URL}/complete`);
+
         setTodos(response.data);
-        return response.data;
+        setIsCompleteTodos(responseComplete.data);
+
+        return [response.data, responseComplete.data];
     };
 
     const reset = () => {
-        setNewTodo("")
-        setEditTodoIndex(undefined);
+        setInputValue("");
+        setSelectedTodo(undefined);
     }
 
     const addHandler = async (e: FormEvent) => {
         e.preventDefault();
 
-        if (!newTodo) {
+        if (!inputValue) {
             toast.warning("Please enter a value");
             return;
         }
 
-        const newTodoItem: ITodo = { id: v4(), name: newTodo, isComplete: false };
+        const newTodoItem: ITodo = { id: v4(), name: inputValue, isComplete: false };
         const response = await axios.post(API_URL, newTodoItem);
 
         await getTodoList();
         return response.data;
     }
 
-    const removeHandler = async (todo: ITodo) => {
-        setSelectedTodo(todo);
+    const deleteHandler = async (id: string) => {
+        setDeleteId(id);
     }
 
     const editHandler = async (e: FormEvent) => {
         e.preventDefault();
-        let temp = [...todos];
-        if (editTodoIndex != undefined) {
-            temp[editTodoIndex].name = newTodo;
+        if (selectedTodo != undefined) {
+            selectedTodo.name = inputValue;
 
-            const response = await axios.put(`${API_URL}/${temp[editTodoIndex].id}`, temp[editTodoIndex])
+            const response = await axios.put(`${API_URL}/${selectedTodo.id}`, selectedTodo)
             await getTodoList();
             return response.data;
         }
     }
 
     const clickEdit = (todo: ITodo, i: number) => {
-        setEditTodoIndex(i);
-        setNewTodo(todo.name);
+        setSelectedTodo(todo)
+        // setIsComplete(todo.isComplete);
+        setInputValue(todo.name);
     }
 
-    const completeHandler = async (index: number) => {
-        const temp = [...todos];
+    const completeHandler = async (todo: ITodo, index: number) => {
+        const temp = todo.isComplete ? [...isCompleteTodos] : [...todos];
 
-        temp[index].isComplete = !temp[index].isComplete
+        temp[index].isComplete = !temp[index].isComplete;
+
         const response = await axios.put(`${API_URL}/${temp[index].id}/complete`, temp[index])
         await getTodoList();
+
         return response.data;
     }
 
     const deletePopupOnSubmit = async () => {
-        await axios.delete(`${API_URL}/${selectedTodo?.id}`);
-        setSelectedTodo(undefined);
+        await axios.delete(`${API_URL}/${deleteId}`);
+        setDeleteId(undefined);
         await getTodoList();
     }
 
     const deletePopupOnCancel = () => {
-        setSelectedTodo(undefined);
+        setDeleteId(undefined);
     };
 
     useEffect(() => {
@@ -122,46 +131,61 @@ export const BoxContainer = () => {
     }, []);
 
     return (
-        <>
-            <From onSubmit={isEdit ? editHandler : addHandler}>
-                <Grid container spacing={2}>
-                    <Grid xs={10}>
-                        <Item>
-                            <TextField label={isEdit ? "edit todo" : "new todo"} value={newTodo} onChange={x => setNewTodo(x.target.value)} fullWidth size="small" />
-                        </Item>
-                    </Grid>
-                    <Grid xs={2}>
-                        <Item>
-                            <Button type="submit" variant="contained" color={isEdit ? "secondary" : "success"}>
-                                {isEdit ? "edit" : "add"}
-                            </Button>
-                        </Item>
-                    </Grid>
-                    <Grid xs={12}>
-                        {todos.map((x, i) => (
+        <From onSubmit={isEdit ? editHandler : addHandler}>
+            <Grid container spacing={2}>
+                <Grid xs={10}>
+                    <Item>
+                        <TextField label={isEdit ? "edit todo" : "new todo"} value={inputValue} onChange={x => setInputValue(x.target.value)} fullWidth size="small" />
+                    </Item>
+                </Grid>
+                <Grid xs={2}>
+                    <Item>
+                        <Button type="submit" variant="contained" color={isEdit ? "secondary" : "success"}>
+                            {isEdit ? "edit" : "add"}
+                        </Button>
+                    </Item>
+                </Grid>
+                <Grid xs={12}>
+                    {todos.map((x, i) => (
+                        <Div key={x.id}>
+                            <Item><Checkbox {...label} defaultChecked onChange={() => completeHandler(x, i)} checked={x.isComplete} />{x.name}</Item>
+                            <Item>
+                                <IconButton color="secondary" onClick={() => clickEdit(x, i)}>
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton color="warning" onClick={() => deleteHandler(x.id)}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Item>
+                        </Div>
+                    ))}
+                </Grid>
+                <Grid xs={12}>
+                    <CustomizedAccordions title="tasks complete">
+                        {isCompleteTodos.map((x, i) => (
                             <Div key={x.id}>
-                                <Item><Checkbox {...label} defaultChecked onChange={() => completeHandler(i)} checked={x.isComplete} />{x.name}</Item>
+                                <Item><Checkbox {...label} defaultChecked onChange={() => completeHandler(x, i)} checked={x.isComplete} />{x.name}</Item>
                                 <Item>
                                     <IconButton color="secondary" onClick={() => clickEdit(x, i)}>
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton color="warning" onClick={() => removeHandler(x)}>
+                                    <IconButton color="warning" onClick={() => deleteHandler(x.id)}>
                                         <DeleteIcon />
                                     </IconButton>
                                 </Item>
                             </Div>
                         ))}
-                        <Popup
-                            title="delete"
-                            buttonColor="warning"
-                            content="are you sure?"
-                            visible={showDeletePopup}
-                            onCancel={deletePopupOnCancel}
-                            onSubmit={deletePopupOnSubmit}
-                        />
-                    </Grid>
-                </Grid >
-            </From >
-        </>
+                    </CustomizedAccordions>
+                </Grid>
+            </Grid >
+            <Popup
+                title="delete"
+                buttonColor="warning"
+                content="are you sure?"
+                visible={showDeletePopup}
+                onCancel={deletePopupOnCancel}
+                onSubmit={deletePopupOnSubmit}
+            />
+        </From >
     );
 }
