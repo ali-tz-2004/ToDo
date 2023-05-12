@@ -4,4 +4,5 @@ public class Todo
     public string? Name { get; set; }
     public bool IsComplete { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CompleteDate { get; set; }
 }

@@ -23,10 +23,10 @@ var app = builder.Build();
 app.UseCors(MyAllowSpecificOrigins);
 
 app.MapGet("/todoItems", async (TodoDb db) =>
-    await db.Todos.OrderByDescending(x => x.CreatedAt).ToListAsync());
+    await db.Todos.Where(x => x.IsComplete == false).OrderByDescending(x => x.CreatedAt).ToListAsync());
 
 app.MapGet("/todoItems/complete", async (TodoDb db) =>
-    await db.Todos.Where(t => t.IsComplete).ToListAsync());
+    await db.Todos.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate).ToListAsync());
 
 app.MapGet("/todoItems/{id}", async (string id, TodoDb db) =>
     await db.Todos.FindAsync(Guid.Parse(id))
@@ -74,6 +74,7 @@ app.MapPut("/todoItems/{id}/complete", async (string id, TodoDb db) =>
     if (todo is null) return Results.NotFound();
 
     todo.IsComplete = !todo.IsComplete;
+    todo.CompleteDate = DateTime.Now;
 
     await db.SaveChangesAsync();
 
