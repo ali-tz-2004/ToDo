@@ -50,7 +50,7 @@ export const BoxContainer = () => {
 
     const showDeletePopup = deleteId !== undefined;
     const isEdit = selectedTodo !== undefined;
-    const API_URL = 'http://localhost:5147/todoItems';
+    const API_URL = 'http://localhost:5147/api/Todo';
 
     const getTodoList = async (): Promise<[ITodo[], ITodo[]]> => {
         reset();
