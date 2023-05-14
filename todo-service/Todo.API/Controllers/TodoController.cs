@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Todo.API.Data;
+
+namespace Todo.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -14,13 +17,13 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Todo>> GetUnCompleteTodos()
+    public async Task<IEnumerable<Todo.API.Model.Todo>> GetUnCompleteTodos()
     {
         return await _db.Todos.Where(x => x.IsComplete == false).OrderByDescending(x => x.CreatedAt).ToListAsync();
     }
 
     [HttpGet("complete")]
-    public async Task<IEnumerable<Todo>> GetInCompleteTodos()
+    public async Task<IEnumerable<Todo.API.Model.Todo>> GetInCompleteTodos()
     {
         return await _db.Todos.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate).ToListAsync();
     }
@@ -44,7 +47,7 @@ public class TodoController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Todo todo)
+    public async Task<IActionResult> Create(Todo.API.Model.Todo todo)
     {
         _db.Todos.Add(todo);
         await _db.SaveChangesAsync();
@@ -54,7 +57,7 @@ public class TodoController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, Todo inputTodo)
+    public async Task<IActionResult> Update(string id, Todo.API.Model.Todo inputTodo)
     {
         var todo = await _db.Todos.FindAsync(Guid.Parse(id));
 
@@ -70,7 +73,7 @@ public class TodoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(String id)
     {
-        if (await _db.Todos.FindAsync(Guid.Parse(id)) is Todo todo)
+        if (await _db.Todos.FindAsync(Guid.Parse(id)) is Todo.API.Model.Todo todo)
         {
             _db.Todos.Remove(todo);
             await _db.SaveChangesAsync();

@@ -1,3 +1,4 @@
+namespace Todo.API.Model;
 public class Todo
 {
     public Guid Id { get; set; } = Guid.NewGuid();

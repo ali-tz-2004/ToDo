@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Todo.API.Data;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -16,7 +17,7 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
+builder.Services.AddDbContext<TodoDb>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();
 
 var app = builder.Build();
