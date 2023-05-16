@@ -1,6 +1,8 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Todo.API.Data;
+using Todo.API.Dto;
+using Todo.API.IRepository;
 
 namespace Todo.API.Controllers;
 
@@ -10,62 +12,65 @@ namespace Todo.API.Controllers;
 public class TodoController : ControllerBase
 {
     private readonly TodoDb _db;
+    private readonly IMapper _mapper;
+    private readonly ITodoRepository _todoRepository;
 
-    public TodoController(TodoDb db)
+    public TodoController(TodoDb db, IMapper mapper, ITodoRepository todoRepository)
     {
         _db = db;
+        _mapper = mapper;
+        _todoRepository = todoRepository;
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Todo.API.Model.Todo>> GetUnCompleteTodos()
+    public async Task<IEnumerable<TodoDto>> GetUnCompleteTodos()
     {
-        return await _db.Todos.Where(x => x.IsComplete == false).OrderByDescending(x => x.CreatedAt).ToListAsync();
+        var allTodo = await _todoRepository.GetAllAsync();
+        var unCompletedTodos = allTodo.Where(x => !x.IsComplete)
+                           .OrderByDescending(x => x.CreatedAt);
+
+        return _mapper.Map<List<TodoDto>>(unCompletedTodos);
     }
 
     [HttpGet("complete")]
-    public async Task<IEnumerable<Todo.API.Model.Todo>> GetInCompleteTodos()
+    public async Task<IEnumerable<TodoDto>> GetInCompleteTodos()
     {
-        return await _db.Todos.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate).ToListAsync();
+        var allTodo = await _todoRepository.GetAllAsync();
+        var todos = allTodo.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate);
+        return _mapper.Map<List<TodoDto>>(todos);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
+    public async Task<ActionResult<TodoDto>> GetById(string id)
     {
-        if (!Guid.TryParse(id, out Guid todoId))
-        {
-            return BadRequest();
-        }
-
-        var todo = await _db.Todos.FindAsync(todoId);
+        var todo = await _todoRepository.GetByIdAsync(id);
 
         if (todo == null)
         {
             return NotFound();
         }
 
-        return Ok(todo);
+        return _mapper.Map<TodoDto>(todo);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Todo.API.Model.Todo todo)
+    public async Task<IActionResult> Create(TodoDto todoDto)
     {
-        _db.Todos.Add(todo);
-        await _db.SaveChangesAsync();
+        var todo = _mapper.Map<API.Model.Todo>(todoDto);
 
-        // return CreatedAtAction(nameof(GetById), new { todo.Id }, todo);
-        return Created($"/todoItems/{todo.Id}", todo);
+        await _todoRepository.AddAsync(todo);
+
+        var createdTodoDto = _mapper.Map<TodoDto>(todo);
+
+        return Created($"/todoItems/{createdTodoDto.Id}", createdTodoDto);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, Todo.API.Model.Todo inputTodo)
+    [HttpPut]
+    public async Task<IActionResult> Update(TodoDto inputTodo)
     {
-        var todo = await _db.Todos.FindAsync(Guid.Parse(id));
+        var todo = _mapper.Map<Model.Todo>(inputTodo);
 
-        if (todo is null) return NotFound();
-
-        todo.Name = inputTodo.Name;
-
-        await _db.SaveChangesAsync();
+        await _todoRepository.UpdateAsync(todo);
 
         return NoContent();
     }
@@ -73,37 +78,14 @@ public class TodoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(String id)
     {
-        if (await _db.Todos.FindAsync(Guid.Parse(id)) is Todo.API.Model.Todo todo)
-        {
-            _db.Todos.Remove(todo);
-            await _db.SaveChangesAsync();
-            return Ok(todo);
-        }
-
-        return NotFound();
+        await _todoRepository.DeleteAsync(id);
+        return NoContent();
     }
 
     [HttpPut("{id}/complete")]
     public async Task<IActionResult> ToggleComplete(string id)
     {
-        if (!Guid.TryParse(id, out Guid todoId))
-        {
-            return BadRequest();
-        }
-
-        var todo = await _db.Todos.FindAsync(todoId);
-
-        if (todo == null)
-        {
-            return NotFound();
-        }
-
-        todo.IsComplete = !todo.IsComplete;
-        todo.CompleteDate = DateTime.Now;
-
-        await _db.SaveChangesAsync();
-
+        await _todoRepository.UpdateCompleteAsync(id);
         return NoContent();
     }
-
 }
