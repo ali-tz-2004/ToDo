@@ -1,4 +1,4 @@
-import { Accordion, Button, Checkbox, Grid, IconButton, TextField, styled } from "@mui/material";
+import { Button, Checkbox, Grid, IconButton, TextField, styled } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormEvent, useEffect, useState } from "react";
@@ -93,7 +93,8 @@ export const BoxContainer = () => {
         if (selectedTodo != undefined) {
             selectedTodo.name = inputValue;
 
-            const response = await axios.put(`${API_URL}/${selectedTodo.id}`, selectedTodo)
+            // const response = await axios.put(`${API_URL}/${selectedTodo.id}`, selectedTodo)
+            const response = await axios.put(`${API_URL}`, selectedTodo)
             await getTodoList();
             return response.data;
         }
@@ -101,7 +102,6 @@ export const BoxContainer = () => {
 
     const clickEdit = (todo: ITodo, i: number) => {
         setSelectedTodo(todo)
-        // setIsComplete(todo.isComplete);
         setInputValue(todo.name);
     }
 
@@ -177,10 +177,9 @@ export const BoxContainer = () => {
                         ))}
                     </CustomizedAccordions>
                 </Grid>
-            </Grid >
+            </Grid>
             <Popup
                 title="delete"
-                buttonColor="warning"
                 content="are you sure?"
                 visible={showDeletePopup}
                 onCancel={deletePopupOnCancel}

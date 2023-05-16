@@ -3,9 +3,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, 
 interface IPopupWarning {
     title: string;
     content: string;
-    buttonColor:
-    'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning',
-    visible: boolean
+    visible: boolean;
     onSubmit: () => void;
     onCancel: () => void;
 }
