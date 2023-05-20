@@ -76,7 +76,7 @@ public class TodoController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(String id)
+    public async Task<IActionResult> Delete(string id)
     {
         await _todoRepository.DeleteAsync(id);
         return NoContent();
