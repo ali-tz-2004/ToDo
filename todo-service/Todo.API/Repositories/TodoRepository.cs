@@ -20,7 +20,7 @@ public class TodoRepository : ITodoRepository
 
     public async Task<Model.Todo> GetByIdAsync(string id)
     {
-        var result = await _context.Todos.FindAsync(id);
+        var result = await _context.Todos.FindAsync(Guid.Parse(id));
         if (result == null) throw new Exception();
         return result;
     }

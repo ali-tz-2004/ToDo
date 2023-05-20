@@ -23,25 +23,25 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<TodoDto>> GetUnCompleteTodos()
+    public async Task<IEnumerable<TodoResponse>> GetUnCompleteTodos()
     {
         var allTodo = await _todoRepository.GetAllAsync();
         var unCompletedTodos = allTodo.Where(x => !x.IsComplete)
                            .OrderByDescending(x => x.CreatedAt);
 
-        return _mapper.Map<List<TodoDto>>(unCompletedTodos);
+        return _mapper.Map<List<TodoResponse>>(unCompletedTodos);
     }
 
     [HttpGet("complete")]
-    public async Task<IEnumerable<TodoDto>> GetInCompleteTodos()
+    public async Task<IEnumerable<TodoResponse>> GetInCompleteTodos()
     {
         var allTodo = await _todoRepository.GetAllAsync();
         var todos = allTodo.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate);
-        return _mapper.Map<List<TodoDto>>(todos);
+        return _mapper.Map<List<TodoResponse>>(todos);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TodoDto>> GetById(string id)
+    public async Task<ActionResult<TodoResponse>> GetById(string id)
     {
         var todo = await _todoRepository.GetByIdAsync(id);
 
@@ -50,23 +50,23 @@ public class TodoController : ControllerBase
             return NotFound();
         }
 
-        return _mapper.Map<TodoDto>(todo);
+        return _mapper.Map<TodoResponse>(todo);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(TodoDto todoDto)
+    public async Task<IActionResult> Create(TodoResponse TodoResponse)
     {
-        var todo = _mapper.Map<API.Model.Todo>(todoDto);
+        var todo = _mapper.Map<API.Model.Todo>(TodoResponse);
 
         await _todoRepository.AddAsync(todo);
 
-        var createdTodoDto = _mapper.Map<TodoDto>(todo);
+        var createdTodoResponse = _mapper.Map<TodoResponse>(todo);
 
-        return Created($"/todoItems/{createdTodoDto.Id}", createdTodoDto);
+        return Created($"/todoItems/{createdTodoResponse.Id}", createdTodoResponse);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update(TodoDto inputTodo)
+    public async Task<IActionResult> Update(TodoResponse inputTodo)
     {
         var todo = _mapper.Map<Model.Todo>(inputTodo);
 

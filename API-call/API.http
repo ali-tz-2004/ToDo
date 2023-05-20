@@ -9,23 +9,24 @@ content-type: application/json
 ###
 
 GET http://localhost:5147/api/Todo
+###
+
+GET http://localhost:5147/api/Todo/complete
 
 ###
 
-GET http://localhost:5147/api/Todo/cd6295ac-4894-4ccc-8ad9-fb3aa18f565b
-
-###
-GET http://localhost:5147/api/Todo
+GET http://localhost:5147/api/Todo/a05ffa75-4b34-42d1-aba2-755497302278
 
 ###
 
-PUT http://localhost:5147/api/Todo/3573c9ab-4c48-433b-8487-be39b2588e36
+PUT http://localhost:5147/api/Todo
 content-type: application/json
 
 {
-    "name": "hello a"
+    "id":"a05ffa75-4b34-42d1-aba2-755497302278",
+    "name": "hello abc"
 }
 
 ###
 
-DELETE  http://localhost:5147/api/Todo/e267231d-686b-49d7-9d74-12652dc027b1
+DELETE  http://localhost:5147/api/Todo/a05ffa75-4b34-42d1-aba2-755497302278
