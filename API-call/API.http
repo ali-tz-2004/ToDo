@@ -1,24 +1,23 @@
+### todo
 POST http://localhost:5147/api/Todo
 content-type: application/json
 
 {
     "name": "hello 02",
-    "IsComplete": false
+    "IsComplete": false,
+    "user"
 }
 
 ###
-
 GET http://localhost:5147/api/Todo
 ###
 
 GET http://localhost:5147/api/Todo/complete
 
 ###
-
 GET http://localhost:5147/api/Todo/a05ffa75-4b34-42d1-aba2-755497302278
 
 ###
-
 PUT http://localhost:5147/api/Todo
 content-type: application/json
 
@@ -28,5 +27,33 @@ content-type: application/json
 }
 
 ###
+DELETE  http://localhost:5147/api/Todo/d1f80e58-1493-45b6-83cb-57f6df69f1fa
 
-DELETE  http://localhost:5147/api/Todo/a05ffa75-4b34-42d1-aba2-755497302278
+### user
+POST http://localhost:5147/api/User
+content-type: application/json
+
+{
+    "Username": "ali",
+    "Email":"ali@gmail.com",
+    "Password":"123456"
+}
+
+###
+GET  http://localhost:5147/api/User/435e1f83-e1b2-42e6-be46-6a47d0628a92
+###
+GET  http://localhost:5147/api/User
+
+###
+DELETE  http://localhost:5147/api/User/435e1f83-e1b2-42e6-be46-6a47d0628a92
+
+###
+PUT http://localhost:5147/api/User
+content-type: application/json
+
+{
+    "id":"bba4a230-1308-4002-8946-e705111bbe8c",
+    "username": "mammad",
+    "email":"mammad@gmail.com",
+    "password":"mmd"
+}
