@@ -3,9 +3,10 @@ POST http://localhost:5147/api/Todo
 content-type: application/json
 
 {
-    "name": "hello 02",
+    "Name": "new post",
     "IsComplete": false,
-    "user"
+    "Username":"alis",
+    "UserId":"d809044d-aeaf-4689-82c6-4ef882c43a59"
 }
 
 ###
@@ -15,19 +16,29 @@ GET http://localhost:5147/api/Todo
 GET http://localhost:5147/api/Todo/complete
 
 ###
-GET http://localhost:5147/api/Todo/a05ffa75-4b34-42d1-aba2-755497302278
+GET http://localhost:5147/api/Todo/b5f6f293-804e-48a5-9947-6bb9aafc78ed
 
 ###
 PUT http://localhost:5147/api/Todo
 content-type: application/json
 
 {
-    "id":"a05ffa75-4b34-42d1-aba2-755497302278",
-    "name": "hello abc"
+    "id":"03631bf8-836d-43d3-88a1-92f6c8387411",
+    "Name": "new my text02",
+    "Username":"alis",
+    "UserId":"d809044d-aeaf-4689-82c6-4ef882c43a59"
 }
 
 ###
-DELETE  http://localhost:5147/api/Todo/d1f80e58-1493-45b6-83cb-57f6df69f1fa
+PUT http://localhost:5147/api/Todo/03631bf8-836d-43d3-88a1-92f6c8387411/complete
+Content-Type: : application/json
+
+{
+    "isComplete":false
+}
+
+###
+DELETE  http://localhost:5147/api/Todo/b5f6f293-804e-48a5-9947-6bb9aafc78ed
 
 ### user
 POST http://localhost:5147/api/User
@@ -43,16 +54,18 @@ content-type: application/json
 GET  http://localhost:5147/api/User/435e1f83-e1b2-42e6-be46-6a47d0628a92
 ###
 GET  http://localhost:5147/api/User
+###
+GET  http://localhost:5147/api/User/49a67e20-92e3-4f5c-b7bf-d56320009799
 
 ###
-DELETE  http://localhost:5147/api/User/435e1f83-e1b2-42e6-be46-6a47d0628a92
+DELETE  http://localhost:5147/api/User/e8f06143-5ab2-4b5d-8958-4cedbbe10771
 
 ###
 PUT http://localhost:5147/api/User
 content-type: application/json
 
 {
-    "id":"bba4a230-1308-4002-8946-e705111bbe8c",
+    "id":"49a67e20-92e3-4f5c-b7bf-d56320009799",
     "username": "mammad",
     "email":"mammad@gmail.com",
     "password":"mmd"

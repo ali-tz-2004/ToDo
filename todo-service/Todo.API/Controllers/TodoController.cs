@@ -23,21 +23,40 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<TodoResponse>> GetUnCompleteTodos()
+    public async Task<IEnumerable<TodoResponse>> GetUnCompleteTodos(string? userId)
     {
         var allTodo = await _todoRepository.GetAllAsync();
-        var unCompletedTodos = allTodo.Where(x => !x.IsComplete)
-                           .OrderByDescending(x => x.CreatedAt);
+        try
+        {
+            var unCompletedTodos = allTodo.Where(x => !x.IsComplete && x.UserId == Guid.Parse(userId!))
+                               .OrderByDescending(x => x.CreatedAt);
+            return _mapper.Map<List<TodoResponse>>(unCompletedTodos);
 
-        return _mapper.Map<List<TodoResponse>>(unCompletedTodos);
+        }
+        catch (System.Exception)
+        {
+            var unCompletedTodos = allTodo.Where(x => !x.IsComplete)
+                               .OrderByDescending(x => x.CreatedAt);
+            return _mapper.Map<List<TodoResponse>>(unCompletedTodos);
+        }
+
     }
 
     [HttpGet("complete")]
-    public async Task<IEnumerable<TodoResponse>> GetInCompleteTodos()
+    public async Task<IEnumerable<TodoResponse>> GetInCompleteTodos(string? userId)
     {
         var allTodo = await _todoRepository.GetAllAsync();
-        var todos = allTodo.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate);
-        return _mapper.Map<List<TodoResponse>>(todos);
+        try
+        {
+            var todos = allTodo.Where(t => t.IsComplete && t.UserId == Guid.Parse(userId!)).OrderByDescending(x => x.CompleteDate);
+            return _mapper.Map<List<TodoResponse>>(todos);
+
+        }
+        catch (System.Exception)
+        {
+            var todos = allTodo.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate);
+            return _mapper.Map<List<TodoResponse>>(todos);
+        }
     }
 
     [HttpGet("{id}")]
@@ -54,9 +73,9 @@ public class TodoController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(TodoResponse TodoResponse)
+    public async Task<IActionResult> Create(TodoRequest todoRequest)
     {
-        var todo = _mapper.Map<API.Model.Todo>(TodoResponse);
+        var todo = _mapper.Map<API.Model.Todo>(todoRequest);
 
         await _todoRepository.AddAsync(todo);
 
@@ -66,7 +85,7 @@ public class TodoController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update(TodoResponse inputTodo)
+    public async Task<IActionResult> Update(TodoRequest inputTodo)
     {
         var todo = _mapper.Map<Model.Todo>(inputTodo);
 

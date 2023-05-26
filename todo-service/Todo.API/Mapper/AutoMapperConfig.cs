@@ -9,6 +9,7 @@ public class AutoMapperConfig : Profile
     public AutoMapperConfig()
     {
         CreateMap<Model.Todo, TodoResponse>().ReverseMap();
+        CreateMap<Model.Todo, TodoRequest>().ReverseMap();
         CreateMap<User, UserResponse>().ReverseMap();
     }
 }

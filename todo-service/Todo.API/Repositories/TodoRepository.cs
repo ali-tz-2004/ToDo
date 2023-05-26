@@ -15,7 +15,7 @@ public class TodoRepository : ITodoRepository
 
     public async Task<List<Model.Todo>> GetAllAsync()
     {
-        return await _context.Todos.ToListAsync();
+        return await _context.Todos.Include(t => t.User).ToListAsync();
     }
 
     public async Task<Model.Todo> GetByIdAsync(string id)
@@ -27,7 +27,12 @@ public class TodoRepository : ITodoRepository
 
     public async Task AddAsync(Model.Todo todo)
     {
-        await _context.AddAsync(todo);
+        var user = await _context.Users.FindAsync(todo.UserId);
+        if (user == null) throw new Exception("User not found");
+
+        todo.Username = user.Username;
+
+        await _context.Todos.AddAsync(todo);
         await _context.SaveChangesAsync();
     }
 
@@ -60,6 +65,7 @@ public class TodoRepository : ITodoRepository
         }
 
         existingTodo.Name = todo.Name;
+        existingTodo.UserId = todo.UserId;
 
         await _context.SaveChangesAsync();
     }
