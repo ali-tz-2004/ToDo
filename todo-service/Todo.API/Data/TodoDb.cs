@@ -18,11 +18,11 @@ public class TodoDb : DbContext
             .Property(t => t.Name)
             .HasMaxLength(80);
 
-        modelBuilder.Entity<Model.Todo>()
-            .HasOne(t => t.Username)
-            .WithMany()
-            .HasForeignKey(t => t.UserId)
-            .IsRequired();
+        modelBuilder.Entity<User>()
+        .HasMany(e => e.Todos)
+        .WithOne(e => e.User)
+        .HasForeignKey(e => e.UserId)
+        .HasPrincipalKey(e => e.Id);
 
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);
@@ -32,11 +32,16 @@ public class TodoDb : DbContext
             .HasMaxLength(60);
 
         modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
             .Property(u => u.Email)
             .HasMaxLength(60);
 
         modelBuilder.Entity<User>()
-            .Property(u => u.Password)
-            .HasMaxLength(60);
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
     }
 }
