@@ -24,11 +24,19 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<List<UserResponse>> GetAll()
+    public async Task<List<UserResponse>> GetAll([FromHeader] string? username)
     {
         var allUsers = await _userRepository.GetAllAsync();
+        try
+        {
+            var user = allUsers.Where(u => u.Username == username || u.Email == username);
 
-        return _mapper.Map<List<UserResponse>>(allUsers);
+            return _mapper.Map<List<UserResponse>>(user);
+        }
+        catch (System.Exception)
+        {
+            return _mapper.Map<List<UserResponse>>(allUsers);
+        }
     }
 
     [HttpGet("{id}")]

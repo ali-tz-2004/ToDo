@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Todo.API.Data;
 using Todo.API.IRepository;
+using Todo.API.Model;
 
 namespace Todo.API.Repositories;
 
@@ -21,7 +23,7 @@ public class TodoRepository : ITodoRepository
     public async Task<Model.Todo> GetByIdAsync(string id)
     {
         var result = await _context.Todos.FindAsync(Guid.Parse(id));
-        if (result == null) throw new Exception();
+        if (result == null) throw new Exception("user id is not found");
         return result;
     }
 
@@ -65,7 +67,6 @@ public class TodoRepository : ITodoRepository
         }
 
         existingTodo.Name = todo.Name;
-        existingTodo.UserId = todo.UserId;
 
         await _context.SaveChangesAsync();
     }

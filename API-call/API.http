@@ -1,44 +1,49 @@
+@userId = 10386704-2d3a-4600-98b5-1423e122a788
+@Authorization = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImQ4MDkwNDRkLWFlYWYtNDY4OS04MmM2LTRlZjg4MmM0M2E1OSIsImV4cCI6MTY4NjgyNTE5NSwiaXNzIjoiVG9kby5BUEkiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUxNDcvYXBpIn0.hsDEzBAt5MHWPKJnH3Lu1A8Ox3SLy1FNUVQvxejDnx8
 ### todo
 POST http://localhost:5147/api/Todo
 content-type: application/json
+Authorization: {{Authorization}}
 
 {
-    "Name": "new post",
-    "IsComplete": false,
-    "Username":"alis",
-    "UserId":"d809044d-aeaf-4689-82c6-4ef882c43a59"
+    "Name": "test",
+    "IsComplete": false
 }
 
 ###
 GET http://localhost:5147/api/Todo
+Authorization: {{Authorization}}
 ###
 
 GET http://localhost:5147/api/Todo/complete
+Authorization: {{Authorization}}
 
 ###
-GET http://localhost:5147/api/Todo/b5f6f293-804e-48a5-9947-6bb9aafc78ed
+GET http://localhost:5147/api/Todo/{{userId}}
+Authorization: {{Authorization}}
 
 ###
 PUT http://localhost:5147/api/Todo
 content-type: application/json
+Authorization: {{Authorization}}
 
 {
-    "id":"03631bf8-836d-43d3-88a1-92f6c8387411",
-    "Name": "new my text02",
-    "Username":"alis",
-    "UserId":"d809044d-aeaf-4689-82c6-4ef882c43a59"
+    "id":"36047f87-91e7-4e7c-b463-1e9fc54f66d2",
+    "Name": "new my text04"
 }
 
 ###
-PUT http://localhost:5147/api/Todo/03631bf8-836d-43d3-88a1-92f6c8387411/complete
+PUT http://localhost:5147/api/Todo/67792940-4dba-4bed-8e02-13a896b6041f/complete
 Content-Type: : application/json
+Authorization: {{Authorization}}
 
 {
-    "isComplete":false
+    "isComplete":true,
 }
 
 ###
-DELETE  http://localhost:5147/api/Todo/b5f6f293-804e-48a5-9947-6bb9aafc78ed
+DELETE  http://localhost:5147/api/Todo/a1699af7-1394-4b01-bdb9-1e72cdf684a6
+Authorization: {{Authorization}}
 
 ### user
 POST http://localhost:5147/api/User
@@ -54,6 +59,7 @@ content-type: application/json
 GET  http://localhost:5147/api/User/435e1f83-e1b2-42e6-be46-6a47d0628a92
 ###
 GET  http://localhost:5147/api/User
+username:ali@gmail.com
 ###
 GET  http://localhost:5147/api/User/49a67e20-92e3-4f5c-b7bf-d56320009799
 
@@ -70,3 +76,17 @@ content-type: application/json
     "email":"mammad@gmail.com",
     "password":"mmd"
 }
+
+### Identity
+POST  http://localhost:5147/api/Identity/logout
+Authorization: {{Authorization}}
+
+###
+POST  http://localhost:5147/api/Identity/login
+content-type: application/json
+
+{
+    "username":"ali",
+    "password":"123456"
+}
+

@@ -42,6 +42,12 @@ public class UserRepository : IUserRepository
         return result;
     }
 
+    public async Task<User> GetByUsernameAndPassword(string username, string password)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => (u.Username == username || u.Email == username) && u.Password == password)
+            ?? throw new Exception($"User with username '{username}' not found.");
+    }
+
     public async Task UpdateAsync(User user)
     {
         if (user == null)
@@ -61,5 +67,13 @@ public class UserRepository : IUserRepository
         existingUser.Password = user.Password;
 
         await _context.SaveChangesAsync();
+    }
+    public Task<User> Authenticate(string username, string password)
+    {
+        var user = GetByUsernameAndPassword(username, password);
+
+        if (user == null) throw new Exception("not fount user!");
+
+        return user;
     }
 }

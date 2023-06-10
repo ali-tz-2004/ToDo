@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.API.Data;
 using Todo.API.Dto;
@@ -6,6 +8,7 @@ using Todo.API.IRepository;
 
 namespace Todo.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 
@@ -23,48 +26,38 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<TodoResponse>> GetUnCompleteTodos(string? userId)
+    public async Task<IEnumerable<TodoResponse>> GetUnCompleteTodos()
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) throw new Exception("User not found");
+
         var allTodo = await _todoRepository.GetAllAsync();
-        try
-        {
-            var unCompletedTodos = allTodo.Where(x => !x.IsComplete && x.UserId == Guid.Parse(userId!))
-                               .OrderByDescending(x => x.CreatedAt);
-            return _mapper.Map<List<TodoResponse>>(unCompletedTodos);
+        var unCompletedTodos = allTodo.Where(t => !t.IsComplete && t.UserId == Guid.Parse(userId))
+                           .OrderByDescending(x => x.CreatedAt);
 
-        }
-        catch (System.Exception)
-        {
-            var unCompletedTodos = allTodo.Where(x => !x.IsComplete)
-                               .OrderByDescending(x => x.CreatedAt);
-            return _mapper.Map<List<TodoResponse>>(unCompletedTodos);
-        }
-
+        return _mapper.Map<List<TodoResponse>>(unCompletedTodos);
     }
 
     [HttpGet("complete")]
-    public async Task<IEnumerable<TodoResponse>> GetInCompleteTodos(string? userId)
+    public async Task<IEnumerable<TodoResponse>> GetInCompleteTodos()
     {
-        var allTodo = await _todoRepository.GetAllAsync();
-        try
-        {
-            var todos = allTodo.Where(t => t.IsComplete && t.UserId == Guid.Parse(userId!)).OrderByDescending(x => x.CompleteDate);
-            return _mapper.Map<List<TodoResponse>>(todos);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) throw new Exception("User not found");
 
-        }
-        catch (System.Exception)
-        {
-            var todos = allTodo.Where(t => t.IsComplete).OrderByDescending(x => x.CompleteDate);
-            return _mapper.Map<List<TodoResponse>>(todos);
-        }
+        var allTodo = await _todoRepository.GetAllAsync();
+        var todos = allTodo.Where(t => t.IsComplete && t.UserId == Guid.Parse(userId)).OrderByDescending(x => x.CompleteDate);
+
+        return _mapper.Map<List<TodoResponse>>(todos);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<TodoResponse>> GetById(string id)
     {
-        var todo = await _todoRepository.GetByIdAsync(id);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) throw new Exception("User not found");
 
-        if (todo == null)
+        var todo = await _todoRepository.GetByIdAsync(id);
+        if (todo == null || todo.UserId != Guid.Parse(userId))
         {
             return NotFound();
         }
@@ -75,7 +68,11 @@ public class TodoController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(TodoRequest todoRequest)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return Unauthorized();
+
         var todo = _mapper.Map<API.Model.Todo>(todoRequest);
+        todo.UserId = Guid.Parse(userId);
 
         await _todoRepository.AddAsync(todo);
 
@@ -87,7 +84,16 @@ public class TodoController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Update(TodoRequest inputTodo)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) return Unauthorized();
+
         var todo = _mapper.Map<Model.Todo>(inputTodo);
+
+        var todoId = await _todoRepository.GetByIdAsync(inputTodo.Id.ToString());
+        if (todoId == null || todoId.UserId != Guid.Parse(userId))
+        {
+            return NotFound();
+        }
 
         await _todoRepository.UpdateAsync(todo);
 
@@ -97,14 +103,34 @@ public class TodoController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) throw new Exception("User not found");
+
+        var todo = await _todoRepository.GetByIdAsync(id);
+        if (todo == null || todo.UserId != Guid.Parse(userId))
+        {
+            return NotFound();
+        }
+
         await _todoRepository.DeleteAsync(id);
+
         return NoContent();
     }
 
     [HttpPut("{id}/complete")]
     public async Task<IActionResult> ToggleComplete(string id)
     {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId == null) throw new Exception("User not found");
+
+        var todo = await _todoRepository.GetByIdAsync(id);
+        if (todo == null || todo.UserId != Guid.Parse(userId))
+        {
+            return NotFound();
+        }
+
         await _todoRepository.UpdateCompleteAsync(id);
+
         return NoContent();
     }
 }
