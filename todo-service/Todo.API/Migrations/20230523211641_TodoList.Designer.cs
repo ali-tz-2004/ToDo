@@ -11,7 +11,7 @@ using Todo.API.Data;
 
 namespace Todo.API.Migrations
 {
-    [DbContext(typeof(TodoDb))]
+    [DbContext(typeof(TodoDbContext))]
     [Migration("20230523211641_TodoList")]
     partial class TodoList
     {

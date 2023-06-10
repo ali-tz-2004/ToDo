@@ -12,11 +12,11 @@ namespace Todo.API.Controllers;
 
 public class UserController : ControllerBase
 {
-    private readonly TodoDb _db;
+    private readonly TodoDbContext _db;
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
 
-    public UserController(TodoDb db, IMapper mapper, IUserRepository userRepository)
+    public UserController(TodoDbContext db, IMapper mapper, IUserRepository userRepository)
     {
         _db = db;
         _mapper = mapper;

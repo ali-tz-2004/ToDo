@@ -7,9 +7,9 @@ namespace Todo.API.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly TodoDb _context;
+    private readonly TodoDbContext _context;
 
-    public UserRepository(TodoDb context)
+    public UserRepository(TodoDbContext context)
     {
         _context = context;
     }

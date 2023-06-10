@@ -14,11 +14,11 @@ namespace Todo.API.Controllers;
 
 public class TodoController : ControllerBase
 {
-    private readonly TodoDb _db;
+    private readonly TodoDbContext _db;
     private readonly IMapper _mapper;
     private readonly ITodoRepository _todoRepository;
 
-    public TodoController(TodoDb db, IMapper mapper, ITodoRepository todoRepository)
+    public TodoController(TodoDbContext db, IMapper mapper, ITodoRepository todoRepository)
     {
         _db = db;
         _mapper = mapper;

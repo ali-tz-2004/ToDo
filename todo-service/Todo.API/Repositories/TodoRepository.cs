@@ -8,9 +8,9 @@ namespace Todo.API.Repositories;
 
 public class TodoRepository : ITodoRepository
 {
-    private readonly TodoDb _context;
+    private readonly TodoDbContext _context;
 
-    public TodoRepository(TodoDb context)
+    public TodoRepository(TodoDbContext context)
     {
         _context = context;
     }

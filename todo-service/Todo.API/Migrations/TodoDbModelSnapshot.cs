@@ -10,7 +10,7 @@ using Todo.API.Data;
 
 namespace Todo.API.Migrations
 {
-    [DbContext(typeof(TodoDb))]
+    [DbContext(typeof(TodoDbContext))]
     partial class TodoDbModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

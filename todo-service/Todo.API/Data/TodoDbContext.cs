@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Todo.API.Model;
 
 namespace Todo.API.Data;
-public class TodoDb : DbContext
+public class TodoDbContext : DbContext
 {
-    public TodoDb(DbContextOptions<TodoDb> options) : base(options) { }
+    public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options) { }
 
     public DbSet<Model.Todo> Todos => Set<Model.Todo>();
     public DbSet<User> Users => Set<User>();
