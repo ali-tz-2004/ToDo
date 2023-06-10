@@ -33,7 +33,8 @@ namespace Todo.API.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config["JWTSetting:Key"]));
+            var jwtSettings = _config["JWTSetting:Key"] ?? string.Empty;
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now.AddDays(Convert.ToDouble(_config["JWTSetting:ExpireDays"]));
 
