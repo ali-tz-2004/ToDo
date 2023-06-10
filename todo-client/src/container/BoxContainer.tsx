@@ -2,14 +2,22 @@ import { Button, Checkbox, Grid, IconButton, TextField, styled } from "@mui/mate
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { FormEvent, useEffect, useState } from "react";
-import { v4 } from "uuid";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Popup from "../components/Popup";
 import { CustomizedAccordions } from "../components/CustomizedAccordions";
+import { useNavigate } from "react-router-dom";
+import { BasicMenu } from "../components/BasicMenu";
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
 
 interface ITodo {
     id: string,
+    name: string,
+    isComplete: boolean,
+    userId: string,
+    username: string,
+}
+interface IRequestTodo {
     name: string,
     isComplete: boolean
 }
@@ -25,7 +33,7 @@ const Item = styled('div')(({ theme }) => ({
 
 const From = styled('form')(() => ({
     width: "100%",
-    height: "100%",
+    marginTop: 10
 }));
 
 const Div = styled('div')(() => ({
@@ -39,25 +47,55 @@ const Div = styled('div')(() => ({
     marginBottom: 10,
 }));
 
+const DivAccount = styled('div')(() => ({
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+}));
+
+const IsComplete = styled('div')(() => ({
+    "span": { textDecoration: "line-through", opacity: "50%" }
+}))
+
+
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export const BoxContainer = () => {
     const [todos, setTodos] = useState<ITodo[]>([]);
-    const [selectedTodo, setSelectedTodo] = useState<ITodo>();
     const [isCompleteTodos, setIsCompleteTodos] = useState<ITodo[]>([]);
+    const [selectedTodo, setSelectedTodo] = useState<ITodo>();
     const [inputValue, setInputValue] = useState("");
     const [deleteId, setDeleteId] = useState<string>();
+    const [user, setUser] = useState<string>("");
+    const [aboutUser, setAboutUser] = useState<string[]>([]);
+    const navigate = useNavigate();
 
     const showDeletePopup = deleteId !== undefined;
     const isEdit = selectedTodo !== undefined;
     const API_URL = 'http://localhost:5147/api/Todo';
+    const API_URL_USER = 'http://localhost:5147/api/User';
+
+    const getToken = () => localStorage.getItem('token')?.replace(/"/g, '');
+    const getUser = () => localStorage.getItem('username');
+
+    const config = {
+        headers: { Authorization: `Bearer ${getToken()}` }
+    };
 
     const getTodoList = async (): Promise<[ITodo[], ITodo[]]> => {
         reset();
 
-        const response = await axios.get(API_URL);
-        const responseComplete = await axios.get(`${API_URL}/complete`);
+        const response = await axios.get(API_URL, config);
 
+        const responseComplete = await axios.get(`${API_URL}/complete`, config);
+
+        const responseUser = await axios.get(API_URL_USER, {
+            headers: {
+                username: getUser()
+            }
+        });
+
+        setUser(responseUser.data[0].username);
         setTodos(response.data);
         setIsCompleteTodos(responseComplete.data);
 
@@ -77,8 +115,8 @@ export const BoxContainer = () => {
             return;
         }
 
-        const newTodoItem: ITodo = { id: v4(), name: inputValue, isComplete: false };
-        const response = await axios.post(API_URL, newTodoItem);
+        const newTodoItem: IRequestTodo = { name: inputValue, isComplete: false };
+        const response = await axios.post(API_URL, newTodoItem, config);
 
         await getTodoList();
         return response.data;
@@ -93,14 +131,13 @@ export const BoxContainer = () => {
         if (selectedTodo != undefined) {
             selectedTodo.name = inputValue;
 
-            // const response = await axios.put(`${API_URL}/${selectedTodo.id}`, selectedTodo)
-            const response = await axios.put(`${API_URL}`, selectedTodo)
+            const response = await axios.put(`${API_URL}`, selectedTodo, config)
             await getTodoList();
             return response.data;
         }
     }
 
-    const clickEdit = (todo: ITodo, i: number) => {
+    const clickEdit = (todo: ITodo) => {
         setSelectedTodo(todo)
         setInputValue(todo.name);
     }
@@ -110,14 +147,14 @@ export const BoxContainer = () => {
 
         temp[index].isComplete = !temp[index].isComplete;
 
-        const response = await axios.put(`${API_URL}/${temp[index].id}/complete`, temp[index])
+        const response = await axios.put(`${API_URL}/${temp[index].id}/complete`, temp[index], config)
         await getTodoList();
 
         return response.data;
     }
 
     const deletePopupOnSubmit = async () => {
-        await axios.delete(`${API_URL}/${deleteId}`);
+        await axios.delete(`${API_URL}/${deleteId}`, config);
         setDeleteId(undefined);
         await getTodoList();
     }
@@ -126,47 +163,42 @@ export const BoxContainer = () => {
         setDeleteId(undefined);
     };
 
+    const check = () => {
+        setAboutUser(["logout", "back home"])
+    }
+
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) navigate('/login')
         getTodoList();
     }, []);
 
     return (
-        <From onSubmit={isEdit ? editHandler : addHandler}>
-            <Grid container spacing={2}>
-                <Grid xs={10}>
-                    <Item>
-                        <TextField label={isEdit ? "edit todo" : "new todo"} value={inputValue} onChange={x => setInputValue(x.target.value)} fullWidth size="small" />
-                    </Item>
-                </Grid>
-                <Grid xs={2}>
-                    <Item>
-                        <Button type="submit" variant="contained" color={isEdit ? "secondary" : "success"}>
-                            {isEdit ? "edit" : "add"}
-                        </Button>
-                    </Item>
-                </Grid>
-                <Grid xs={12}>
-                    {todos.map((x, i) => (
-                        <Div key={x.id}>
-                            <Item><Checkbox {...label} defaultChecked onChange={() => completeHandler(x, i)} checked={x.isComplete} />{x.name}</Item>
-                            <Item>
-                                <IconButton color="secondary" onClick={() => clickEdit(x, i)}>
-                                    <EditIcon />
-                                </IconButton>
-                                <IconButton color="warning" onClick={() => deleteHandler(x.id)}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </Item>
-                        </Div>
-                    ))}
-                </Grid>
-                <Grid xs={12}>
-                    <CustomizedAccordions title="tasks complete">
-                        {isCompleteTodos.map((x, i) => (
+        <>
+            <DivAccount onClick={check}>
+                <AccountBoxIcon></AccountBoxIcon>
+                <BasicMenu title={user} children={aboutUser}></BasicMenu>
+            </DivAccount >
+            <From onSubmit={isEdit ? editHandler : addHandler}>
+                <Grid container spacing={2}>
+                    <Grid xs={10}>
+                        <Item>
+                            <TextField label={isEdit ? "edit todo" : "new todo"} value={inputValue} onChange={x => setInputValue(x.target.value)} fullWidth size="small" />
+                        </Item>
+                    </Grid>
+                    <Grid xs={2}>
+                        <Item>
+                            <Button type="submit" variant="contained" color={isEdit ? "secondary" : "success"}>
+                                {isEdit ? "edit" : "add"}
+                            </Button>
+                        </Item>
+                    </Grid>
+                    <Grid xs={12}>
+                        {todos.map((x, i) => (
                             <Div key={x.id}>
                                 <Item><Checkbox {...label} defaultChecked onChange={() => completeHandler(x, i)} checked={x.isComplete} />{x.name}</Item>
                                 <Item>
-                                    <IconButton color="secondary" onClick={() => clickEdit(x, i)}>
+                                    <IconButton color="secondary" onClick={() => clickEdit(x)}>
                                         <EditIcon />
                                     </IconButton>
                                     <IconButton color="warning" onClick={() => deleteHandler(x.id)}>
@@ -175,16 +207,38 @@ export const BoxContainer = () => {
                                 </Item>
                             </Div>
                         ))}
-                    </CustomizedAccordions>
+                    </Grid>
+                    <Grid xs={12}>
+                        <CustomizedAccordions title="tasks complete">
+                            {isCompleteTodos.map((x, i) => (
+                                <IsComplete key={x.id}>
+                                    <Div>
+                                        <Item>
+                                            <Checkbox {...label} defaultChecked onChange={() => completeHandler(x, i)} checked={x.isComplete} />
+                                            <span>{x.name}</span>
+                                        </Item>
+                                        <Item>
+                                            <IconButton color="secondary" onClick={() => clickEdit(x)}>
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton color="warning" onClick={() => deleteHandler(x.id)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Item>
+                                    </Div>
+                                </IsComplete>
+                            ))}
+                        </CustomizedAccordions>
+                    </Grid>
                 </Grid>
-            </Grid>
-            <Popup
-                title="delete"
-                content="are you sure?"
-                visible={showDeletePopup}
-                onCancel={deletePopupOnCancel}
-                onSubmit={deletePopupOnSubmit}
-            />
-        </From >
+                <Popup
+                    title="delete"
+                    content="are you sure?"
+                    visible={showDeletePopup}
+                    onCancel={deletePopupOnCancel}
+                    onSubmit={deletePopupOnSubmit}
+                />
+            </From >
+        </>
     );
 }

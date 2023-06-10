@@ -9,7 +9,7 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 
 interface ICustomized {
-    title: string,
+    title: string | JSX.Element,
     children: React.ReactNode;
 }
 
