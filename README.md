@@ -1,5 +1,6 @@
+![alt text](/todo.PNG)
 Todo App
-This is a simple Todo app built with [insert technology used, e.g. React].
+This is a simple Todo app build
 
 Getting Started
 To get started with the app, clone the repo and then install the necessary dependencies:
