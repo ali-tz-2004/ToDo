@@ -5,8 +5,11 @@ This is a simple Todo app build
 Getting Started
 To get started with the app, clone the repo and then install the necessary dependencies:
 
+
 Copy
 $ git clone https://github.com/ali-tz-2004/ToDo.git
+
+todo-client:
 $ cd todo-client
 npm:
 $ npm install
@@ -22,6 +25,14 @@ $ npm start
 yarn:
 $ yarn start
 The app will be served at http://localhost:3000.
+
+todo-service:
+go to Todo.API/appsettings.json
+and set DefaultConnection with you data connection 
+Copy
+$ cd todo-service
+$ dotnet ef database update
+
 
 Features
 With this app, you can:
