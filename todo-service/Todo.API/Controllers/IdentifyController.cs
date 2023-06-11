@@ -4,7 +4,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Todo.API.Dto;
+using Todo.API.Dto.Responses;
 using Todo.API.IRepository;
+using Todo.API.Services.Users;
 
 namespace Todo.API.Controllers
 {
@@ -12,40 +14,26 @@ namespace Todo.API.Controllers
     [Route("api/[controller]")]
     public class IdentityController : ControllerBase
     {
-        private readonly IConfiguration _config;
-        private readonly IUserRepository _user;
+        private readonly IUserService _userService;
 
-        public IdentityController(IConfiguration config, IUserRepository user)
+        public IdentityController(IUserService userService)
         {
-            _config = config;
-            _user = user;
+            _userService = userService;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginRequest userLoginRequest)
+        public async Task<ActionResult<LoginResponse>> Login(UserLoginRequest userLoginRequest)
         {
-            var user = await _user.Authenticate(userLoginRequest.Username, userLoginRequest.Password);
-
-            if (user == null) return Unauthorized();
-
-            var claims = new[]
+            try
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            };
+                var response = await _userService.Login(userLoginRequest);
 
-            var jwtSettings = _config["JWTSetting:Key"] ?? string.Empty;
-            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(Convert.ToDouble(_config["JWTSetting:ExpireDays"]));
-
-            var token = new JwtSecurityToken(
-                issuer: _config["JWTSetting:Issuer"],
-                audience: _config["JWTSetting:Audience"],
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds);
-
-            return Ok(new JwtSecurityTokenHandler().WriteToken(token));
+                return Ok(response);
+            }
+            catch (System.Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
     }
 }

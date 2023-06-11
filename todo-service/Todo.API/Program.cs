@@ -7,6 +7,7 @@ using Todo.API.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Todo.API.Services.Users;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -57,7 +58,7 @@ builder.Services.AddSingleton(mapper);
 
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
