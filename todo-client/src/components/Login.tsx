@@ -40,7 +40,7 @@ export default function Login() {
             const response = await axios.post(API_URL, {
                 username: emailOrUsername, password: password
             });
-            localStorage.setItem('token', JSON.stringify(response.data));
+            localStorage.setItem('token', JSON.stringify(response.data.token));
 
             if (response.data) {
                 toast.success("login is success");
