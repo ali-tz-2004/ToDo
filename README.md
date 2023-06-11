@@ -26,8 +26,8 @@ yarn:
 $ yarn start
 The app will be served at http://localhost:3000.
 
-todo-service:
-go to Todo.API/appsettings.json
+todo-service/Todo.API:
+go to appsettings.json
 and set DefaultConnection with you data connection 
 Copy
 $ cd todo-service
