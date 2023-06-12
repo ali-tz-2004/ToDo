@@ -5,10 +5,10 @@ This is a simple Todo app build
 Getting Started
 To get started with the app, clone the repo and then install the necessary dependencies:
 
-
 Copy
+```sh
 $ git clone https://github.com/ali-tz-2004/ToDo.git
-
+```
 todo-client:
 $ cd todo-client
 npm:
