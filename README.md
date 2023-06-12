@@ -1,6 +1,6 @@
-![alt text](/todo.PNG)
-Todo App
+# Todo App
 This is a simple Todo app build
+![todo app](/todo.PNG)
 
 Getting Started
 To get started with the app, clone the repo and then install the necessary dependencies:
