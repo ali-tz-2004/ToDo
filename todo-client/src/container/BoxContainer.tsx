@@ -9,6 +9,7 @@ import { CustomizedAccordions } from "../components/CustomizedAccordions";
 import { useNavigate } from "react-router-dom";
 import { BasicMenu } from "../components/BasicMenu";
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import { urls } from "../utils/urls";
 
 interface ITodo {
     id: string,
@@ -57,7 +58,6 @@ const IsComplete = styled('div')(() => ({
     "span": { textDecoration: "line-through", opacity: "50%" }
 }))
 
-
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export const BoxContainer = () => {
@@ -72,24 +72,17 @@ export const BoxContainer = () => {
 
     const showDeletePopup = deleteId !== undefined;
     const isEdit = selectedTodo !== undefined;
-    const API_URL = 'http://localhost:5147/api/Todo';
-    const API_URL_USER = 'http://localhost:5147/api/User';
 
-    const getToken = () => localStorage.getItem('token')?.replace(/"/g, '');
     const getUser = () => localStorage.getItem('username');
-
-    const config = {
-        headers: { Authorization: `Bearer ${getToken()}` }
-    };
 
     const getTodoList = async (): Promise<[ITodo[], ITodo[]]> => {
         reset();
 
-        const response = await axios.get(API_URL, config);
+        const response = await axios.get(urls.todo);
 
-        const responseComplete = await axios.get(`${API_URL}/complete`, config);
+        const responseComplete = await axios.get(`${urls.todo}/complete`);
 
-        const responseUser = await axios.get(API_URL_USER, {
+        const responseUser = await axios.get(urls.user, {
             headers: {
                 username: getUser()
             }
@@ -116,7 +109,7 @@ export const BoxContainer = () => {
         }
 
         const newTodoItem: IRequestTodo = { name: inputValue, isComplete: false };
-        const response = await axios.post(API_URL, newTodoItem, config);
+        const response = await axios.post(urls.todo, newTodoItem);
 
         await getTodoList();
         return response.data;
@@ -131,7 +124,7 @@ export const BoxContainer = () => {
         if (selectedTodo != undefined) {
             selectedTodo.name = inputValue;
 
-            const response = await axios.put(`${API_URL}`, selectedTodo, config)
+            const response = await axios.put(`${urls.todo}`, selectedTodo)
             await getTodoList();
             return response.data;
         }
@@ -147,14 +140,14 @@ export const BoxContainer = () => {
 
         temp[index].isComplete = !temp[index].isComplete;
 
-        const response = await axios.put(`${API_URL}/${temp[index].id}/complete`, temp[index], config)
+        const response = await axios.put(`${urls.todo}/${temp[index].id}/complete`, temp[index])
         await getTodoList();
 
         return response.data;
     }
 
     const deletePopupOnSubmit = async () => {
-        await axios.delete(`${API_URL}/${deleteId}`, config);
+        await axios.delete(`${urls.todo}/${deleteId}`);
         setDeleteId(undefined);
         await getTodoList();
     }

@@ -4,6 +4,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { urls } from '../utils/urls';
 
 const AvatarStyled = styled(Avatar)(() => ({
     backgroundColor: "red",
@@ -31,31 +32,36 @@ export default function Login() {
 
     const navigate = useNavigate();
 
-    const API_URL = `http://localhost:5147/api/Identity/login`;
-
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         try {
-            const response = await axios.post(API_URL, {
-                username: emailOrUsername, password: password
+            const response = await axios.post(urls.identity, {
+                username: emailOrUsername,
+                password: password
             });
-            localStorage.setItem('token', JSON.stringify(response.data.token));
+
+            if (response.data && response.data.token) {
+                localStorage.setItem("token", JSON.stringify(response.data.token));
+                toast.success("login is success");
+                navigate("/todo");
+            } else {
+                toast.warning("The email or password is incorrect");
+            }
 
             if (response.data) {
                 toast.success("login is success");
                 navigate('/todo');
             }
         } catch (error) {
-            toast.warning("The email or password is incorrect");
+            console.error(error);
+            toast.warning("The email or password is incorrect 02");
         }
     };
 
     useEffect(() => {
         const savedUsername = localStorage.getItem('token');
-        if (savedUsername) {
-            navigate('/');
-        }
+        if (savedUsername) navigate('/');
     }, [navigate]);
 
     useEffect(() => {
