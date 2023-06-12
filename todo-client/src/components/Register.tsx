@@ -1,9 +1,10 @@
 import { Avatar, Button, TextField, Typography, styled } from '@mui/material';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { urls } from '../utils/urls';
 
 interface IUser {
     username: string;
@@ -39,15 +40,11 @@ export const Register = () => {
 
     const navigate = useNavigate();
 
-    const API_URL = 'http://localhost:5147/api/User';
-
-
-    const handleSubmit = async (e: any) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-
         try {
             const newUser: IUser = { username: username, email: email, password: password };
-            const response = await axios.post(API_URL, newUser);
+            const response = await axios.post(urls.user, newUser);
 
             if (response.data) {
                 toast.success("Register is success");

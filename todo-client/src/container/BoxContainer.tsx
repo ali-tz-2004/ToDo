@@ -18,9 +18,16 @@ interface ITodo {
     userId: string,
     username: string,
 }
+
 interface IRequestTodo {
     name: string,
     isComplete: boolean
+}
+
+interface IUser {
+    id: string,
+    username: string,
+    email: string,
 }
 
 const Item = styled('div')(({ theme }) => ({
@@ -78,11 +85,11 @@ export const BoxContainer = () => {
     const getTodoList = async (): Promise<[ITodo[], ITodo[]]> => {
         reset();
 
-        const response = await axios.get(urls.todo);
+        const response = await axios.get<ITodo[]>(urls.todo);
 
-        const responseComplete = await axios.get(`${urls.todo}/complete`);
+        const responseComplete = await axios.get<ITodo[]>(`${urls.todo}/complete`);
 
-        const responseUser = await axios.get(urls.user, {
+        const responseUser = await axios.get<IUser[]>(urls.user, {
             headers: {
                 username: getUser()
             }

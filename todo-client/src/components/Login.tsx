@@ -6,11 +6,14 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { urls } from '../utils/urls';
 
+interface IToken {
+    token: string
+}
+
 const AvatarStyled = styled(Avatar)(() => ({
     backgroundColor: "red",
     margin: 2
 }));
-
 
 const Form = styled("form")(() => ({
     width: '100%',
@@ -36,26 +39,20 @@ export default function Login() {
         e.preventDefault();
 
         try {
-            const response = await axios.post(urls.identity, {
+            const response = await axios.post<IToken>(urls.identity, {
                 username: emailOrUsername,
                 password: password
             });
 
             if (response.data && response.data.token) {
                 localStorage.setItem("token", JSON.stringify(response.data.token));
-                toast.success("login is success");
                 navigate("/todo");
             } else {
-                toast.warning("The email or password is incorrect");
-            }
-
-            if (response.data) {
-                toast.success("login is success");
-                navigate('/todo');
+                toast.warning("The email or password is wrong");
             }
         } catch (error) {
             console.error(error);
-            toast.warning("The email or password is incorrect 02");
+            toast.warning("The email or password is wrong");
         }
     };
 
