@@ -17,8 +17,8 @@ open todo-service with this code:
 ```open todo-service
 cd todo-service/Todo.API
 ```
-go to appsettings.json
-and set DefaultConnection with you data connection
+go to appsettings.json and set DefaultConnection with you data connection(sql server)
+after write this code in terminal:
 ```
 dotnet ef database update
 ```
