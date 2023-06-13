@@ -1,6 +1,4 @@
 import { Button, Checkbox, Grid, IconButton, TextField, styled } from "@mui/material";
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { FormEvent, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -10,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { BasicMenu } from "../components/BasicMenu";
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import { urls } from "../utils/urls";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import React from "react";
 
 interface ITodo {
     id: string,
@@ -74,11 +74,13 @@ export const BoxContainer = () => {
     const [inputValue, setInputValue] = useState("");
     const [deleteId, setDeleteId] = useState<string>();
     const [user, setUser] = useState<string>("");
-    const [aboutUser, setAboutUser] = useState<string[]>([]);
+
     const navigate = useNavigate();
 
     const showDeletePopup = deleteId !== undefined;
     const isEdit = selectedTodo !== undefined;
+    const options = ['Remove', 'Edit'];
+    const aboutUser = ["Logout", "Back home"];
 
     const getUser = () => localStorage.getItem('username');
 
@@ -163,21 +165,42 @@ export const BoxContainer = () => {
         setDeleteId(undefined);
     };
 
-    const check = () => {
-        setAboutUser(["logout", "back home"])
-    }
-
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) navigate('/login')
         getTodoList();
     }, []);
 
+    const resetLogout = async () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+    }
+
+    const handleClose = async (event: React.MouseEvent<HTMLElement>, todo?: ITodo, id?: string) => {
+        const clickedItem = (event.target as HTMLElement).getAttribute("data-value");
+
+        switch (clickedItem) {
+            case "Back home":
+                navigate("/");
+                break;
+            case "Logout":
+                resetLogout();
+                navigate("/");
+                break;
+            case "Remove":
+                deleteHandler(id ? id : "");
+                break;
+            case "Edit":
+                if (todo) clickEdit(todo);
+                break;
+        }
+    };
+
     return (
         <>
-            <DivAccount onClick={check}>
+            <DivAccount>
                 <AccountBoxIcon></AccountBoxIcon>
-                <BasicMenu title={user} children={aboutUser}></BasicMenu>
+                <BasicMenu title={user} children={aboutUser} onClose={handleClose}></BasicMenu>
             </DivAccount >
             <From onSubmit={isEdit ? editHandler : addHandler}>
                 <Grid container spacing={2}>
@@ -198,12 +221,7 @@ export const BoxContainer = () => {
                             <Div key={x.id}>
                                 <Item><Checkbox {...label} defaultChecked onChange={() => completeHandler(x, i)} checked={x.isComplete} />{x.name}</Item>
                                 <Item>
-                                    <IconButton color="secondary" onClick={() => clickEdit(x)}>
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton color="warning" onClick={() => deleteHandler(x.id)}>
-                                        <DeleteIcon />
-                                    </IconButton>
+                                    <BasicMenu title={<MoreVertIcon />} children={options} onClose={(e) => handleClose(e, x, x.id)}></BasicMenu>
                                 </Item>
                             </Div>
                         ))}
@@ -218,12 +236,7 @@ export const BoxContainer = () => {
                                             <span>{x.name}</span>
                                         </Item>
                                         <Item>
-                                            <IconButton color="secondary" onClick={() => clickEdit(x)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton color="warning" onClick={() => deleteHandler(x.id)}>
-                                                <DeleteIcon />
-                                            </IconButton>
+                                            <BasicMenu title={<MoreVertIcon />} children={options} onClose={(e) => handleClose(e, x, x.id)}></BasicMenu>
                                         </Item>
                                     </Div>
                                 </IsComplete>

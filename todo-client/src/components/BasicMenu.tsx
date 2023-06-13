@@ -2,10 +2,10 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { useNavigate } from 'react-router-dom';
 
 interface IMenu {
-    title: string;
+    title: string | React.ReactNode;
+    onClose: (event: React.MouseEvent<HTMLElement>) => void;
     children: string[];
 }
 
@@ -13,31 +13,14 @@ export const BasicMenu = (props: IMenu) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
-    const navigate = useNavigate();
-
-    const reset = async () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-    }
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = async (event: React.MouseEvent<HTMLElement>) => {
+    const handleClose = () => {
         setAnchorEl(null);
-        const clickedItem = (event.target as HTMLElement).getAttribute("data-value");
-
-        switch (clickedItem) {
-            case "back home":
-                navigate("/");
-                break;
-            case "logout":
-                reset();
-                navigate("/");
-                break;
-        }
-    };
+    }
 
     return (
         <div>
@@ -60,7 +43,7 @@ export const BasicMenu = (props: IMenu) => {
                 }}
             >
                 {props.children.map((x) => (
-                    <MenuItem key={x} onClick={handleClose} data-value={x}>
+                    <MenuItem key={x} onClick={(event) => { handleClose(); props.onClose(event) }} data-value={x}>
                         {x}
                     </MenuItem>
                 ))}
