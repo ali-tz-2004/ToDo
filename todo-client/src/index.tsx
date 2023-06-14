@@ -4,12 +4,12 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import Login from './components/Login';
+import Login from './pages/Login';
 import styled from '@emotion/styled';
 import { Container } from '@mui/material';
 import { ToastContainer } from 'react-toastify';
 import { BoxContainer } from './container/BoxContainer';
-import { Register } from './components/Register';
+import { Register } from './pages/Register';
 
 const router = createBrowserRouter([
   {

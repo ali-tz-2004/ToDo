@@ -1,5 +1,5 @@
 import 'react-toastify/dist/ReactToastify.css';
-import { Main } from './components/Main';
+import { Main } from './pages/Main';
 import "./utils/AxiosInterceptors";
 
 function App() {
